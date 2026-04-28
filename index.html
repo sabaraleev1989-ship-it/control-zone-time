@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Scorpion Tactical G2</title>
 
+    <link rel="icon" type="image/png" href="icon.png">
+    <link rel="apple-touch-icon" href="icon.png">
+    
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#0c0c0c">
@@ -73,14 +76,14 @@
             animation: active-pulse 1.5s ease-in-out infinite;
             z-index: 5;
             box-shadow: inset 0 0 100px rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
         }
 
         .dimmed {
-            filter: brightness(0.35) saturate(0.8);
-            opacity: 0.8 !important;
+            filter: brightness(0.4);
+            opacity: 0.7 !important;
         }
 
-        /* МЕНЮ */
         #controls-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -189,7 +192,6 @@
     </div>
 
     <script>
-        // --- ГЕНЕРАТОР ЗВУКА (РАБОТАЕТ БЕЗ ИНТЕРНЕТА) ---
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         
         function playTone(freq, type, duration, vol) {
@@ -211,7 +213,6 @@
             setTimeout(() => playTone(400, 'square', 1, 0.3), 1200);
         }
 
-        // --- ЛОГИКА ИГРЫ ---
         let gameTime = 1800;
         let teamTimes = [0, 0, 0];
         let active = null;
@@ -295,7 +296,6 @@
             }
         }
 
-        // --- РЕГИСТРАЦИЯ SERVICE WORKER (ОФФЛАЙН РЕЖИМ) ---
         if ('serviceWorker' in navigator) {
             const swCode = `
                 self.addEventListener('install', e => e.waitUntil(caches.open('v1').then(c => c.add(location.href))));
