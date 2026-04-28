@@ -42,7 +42,8 @@
             align-items: center;
             cursor: pointer;
             z-index: 1;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 0px solid white;
         }
 
         #half-a { background-color: var(--team-a-color); }
@@ -50,48 +51,55 @@
 
         .team-label {
             position: absolute;
-            top: 40px; left: 30px;
-            font-size: 1.1rem;
-            font-weight: bold;
-            letter-spacing: 2px;
+            top: 25px; left: 25px;
+            font-size: 1.5rem;
+            font-weight: 900;
+            letter-spacing: 1px;
             z-index: 10;
             text-transform: uppercase;
-            opacity: 0.8;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+        }
+
+        .status-hint {
+            position: absolute;
+            bottom: 25px;
+            font-size: 1.2rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            opacity: 0.9;
         }
 
         .giant-timer {
-            font-size: clamp(4rem, 22vw, 10rem);
-            font-weight: 800;
+            font-size: clamp(5rem, 25vw, 12rem);
+            font-weight: 900;
             font-variant-numeric: tabular-nums;
             z-index: 20;
             pointer-events: none;
-            text-shadow: 0 0 30px rgba(0,0,0,0.3);
+            text-shadow: 0 0 40px rgba(0,0,0,0.4);
         }
 
-        /* АКТИВНАЯ СТОРОНА: ЯРКАЯ И МИГАЮЩАЯ */
+        /* АКТИВНОЕ СОСТОЯНИЕ: СТРОБОСКОП + РАМКА */
         .active {
             z-index: 5;
-            transform: scale(1.03); /* Слегка увеличиваем активную зону */
-            filter: brightness(1.2);
             animation: aggressive-strobe 0.8s steps(2, start) infinite;
         }
 
         @keyframes aggressive-strobe {
             0% { 
-                filter: brightness(2.0) contrast(1.4);
-                box-shadow: inset 0 0 100px rgba(255,255,255,0.7);
+                filter: brightness(2.0) contrast(1.5);
+                box-shadow: inset 0 0 0 15px #fff, inset 0 0 100px rgba(0,0,0,0.3);
             }
             50% { 
                 filter: brightness(1.0);
-                box-shadow: inset 0 0 200px rgba(0,0,0,0.4);
+                box-shadow: inset 0 0 0 5px #fff, inset 0 0 150px rgba(0,0,0,0.5);
             }
         }
 
-        /* НЕАКТИВНАЯ СТОРОНА: ВИДНО ЦВЕТ, НО ОНА В ТЕНИ */
+        /* НЕАКТИВНОЕ СОСТОЯНИЕ: ЦВЕТ ВИДЕН, НО СПОКОЕН */
         .dimmed {
-            filter: brightness(0.35) saturate(0.8); /* Цвет виден, но приглушен */
-            opacity: 0.7;
-            transform: scale(0.97); /* Немного уменьшаем визуально */
+            filter: brightness(0.55) saturate(0.7);
+            opacity: 0.8;
         }
 
         #controls-overlay {
@@ -135,7 +143,7 @@
         }
 
         input[type="color"] {
-            width: 65px; height: 65px;
+            width: 70px; height: 70px;
             border-radius: 50%;
             border: 3px solid #fff;
             background: none;
@@ -160,7 +168,7 @@
             background: rgba(255,255,255,0.2);
             color: #fff;
             font-size: 2.2rem;
-            z-index: 90;
+            z-index: 110;
             display: flex; justify-content: center; align-items: center;
             border: 2px solid rgba(255,255,255,0.4);
         }
@@ -171,11 +179,13 @@
     <div id="half-a" class="team-half" onclick="capture(1)">
         <div id="label-a" class="team-label">СТОРОНА «...»</div>
         <div id="timer-a" class="giant-timer">00:00</div>
+        <div id="hint-a" class="status-hint">НАЖМИ ДЛЯ ЗАХВАТА</div>
     </div>
 
     <div id="half-b" class="team-half" onclick="capture(2)">
         <div id="label-b" class="team-label">СТОРОНА «...»</div>
         <div id="timer-b" class="giant-timer">00:00</div>
+        <div id="hint-b" class="status-hint">НАЖМИ ДЛЯ ЗАХВАТА</div>
     </div>
 
     <button id="menu-toggle" onclick="toggleMenu()">⚙</button>
@@ -273,6 +283,10 @@
             active = t;
             document.getElementById('half-a').className = 'team-half' + (t === 1 ? ' active' : ' dimmed');
             document.getElementById('half-b').className = 'team-half' + (t === 2 ? ' active' : ' dimmed');
+            
+            document.getElementById('hint-a').innerText = (t === 1 ? 'ИДЕТ УДЕРЖАНИЕ' : 'НАЖМИ ДЛЯ ЗАХВАТА');
+            document.getElementById('hint-b').innerText = (t === 2 ? 'ИДЕТ УДЕРЖАНИЕ' : 'НАЖМИ ДЛЯ ЗАХВАТА');
+            
             playTick();
         }
 
@@ -285,7 +299,7 @@
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js').then(reg => console.log('Ready'));
+                navigator.serviceWorker.register('sw.js');
             });
         }
 
