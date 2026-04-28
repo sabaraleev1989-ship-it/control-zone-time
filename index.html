@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tactical Control Point</title>
+    <style>
+        :root {
+            --bg-color: #1a1a1a;
+            --panel-color: #2d2d2d;
+            --text-color: #e0e0e0;
+        }
+
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        .main-container {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            background: var(--panel-color);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+
+        .team-panel {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .timer-display {
+            font-size: 3rem;
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(0,0,0,0.5);
+        }
+
+        .control-btn {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            border: 5px solid #444;
+            cursor: pointer;
+            outline: none;
+            transition: transform 0.1s;
+            background-color: #555;
+        }
+
+        .control-btn:active {
+            transform: scale(0.95);
+        }
+
+        .active-blink {
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0% { opacity: 1; box-shadow: 0 0 20px currentColor; }
+            50% { opacity: 0.5; box-shadow: 0 0 5px currentColor; }
+            100% { opacity: 1; box-shadow: 0 0 20px currentColor; }
+        }
+
+        .game-master {
+            text-align: center;
+            border-left: 2px solid #444;
+            border-right: 2px solid #444;
+            padding: 0 40px;
+        }
+
+        #game-timer {
+            font-size: 4rem;
+            background: none;
+            border: 1px dashed #666;
+            color: #00ff00;
+            text-align: center;
+            width: 200px;
+            margin-bottom: 10px;
+        }
+
+        input[type="color"] {
+            width: 50px;
+            height: 30px;
+            border: none;
+            cursor: pointer;
+            background: none;
+        }
+
+        .status-label {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-container">
+        <div class="team-panel">
+            <input type="color" id="color1" value="#ff0000">
+            <div id="display1" class="timer-display">00:00</div>
+            <button id="btn1" class="control-btn" onclick="toggleTimer(1)"></button>
+            <div class="status-label">Сторона А</div>
+        </div>
+
+        <div class="game-master">
+            <div class="status-label">Время игры</div>
+            <input type="text" id="game-timer" value="30:00" onchange="updateGameTime(this.value)">
+            <br>
+            <button onclick="startGame()" style="padding: 10px 20px; cursor:pointer;">СТАРТ / ПАУЗА</button>
+            <button onclick="resetAll()" style="padding: 10px 20px; cursor:pointer;">СБРОС</button>
+        </div>
+
+        <div class="team-panel">
+            <input type="color" id="color2" value="#0000ff">
+            <div id="display2" class="timer-display">00:00</div>
+            <button id="btn2" class="control-btn" onclick="toggleTimer(2)"></button>
+            <div class="status-label">Сторона Б</div>
+        </div>
+    </div>
+
+    <script>
+        let gameTime = 1800; // 30 минут в секундах
+        let teamTimes = [0, 0, 0]; // Индексы 1 и 2 для команд
+        let activeTeam = null;
+        let gameRunning = false;
+        let interval = null;
+
+        // Звуковой сигнал
+        const beep = new Audio('https://actions.google.com/sounds/v1/alarms/alarm_clock_ringing_proximity.ogg');
+
+        function formatTime(s) {
+            let mins = Math.floor(s / 60);
+            let secs = s % 60;
+            return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function updateGameTime(val) {
+            let parts = val.split(':');
+            if(parts.length === 2) {
+                gameTime = parseInt(parts[0]) * 60 + parseInt(parts[1]);
+            }
+        }
+
+        function toggleTimer(team) {
+            if (!gameRunning) return; // Не считать, пока игра не начата
+            activeTeam = team;
+            
+            // Визуальное переключение
+            const b1 = document.getElementById('btn1');
+            const b2 = document.getElementById('btn2');
+            const c1 = document.getElementById('color1').value;
+            const c2 = document.getElementById('color2').value;
+
+            if (team === 1) {
+                b1.classList.add('active-blink');
+                b1.style.backgroundColor = c1;
+                b1.style.color = c1;
+                b2.classList.remove('active-blink');
+                b2.style.backgroundColor = '#555';
+            } else {
+                b2.classList.add('active-blink');
+                b2.style.backgroundColor = c2;
+                b2.style.color = c2;
+                b1.classList.remove('active-blink');
+                b1.style.backgroundColor = '#555';
+            }
+        }
+
+        function startGame() {
+            if (gameRunning) {
+                gameRunning = false;
+                clearInterval(interval);
+            } else {
+                gameRunning = true;
+                interval = setInterval(tick, 1000);
+            }
+        }
+
+        function tick() {
+            if (gameTime <= 0) {
+                clearInterval(interval);
+                gameRunning = false;
+                beep.play();
+                alert("ВРЕМЯ ВЫШЛО!");
+                return;
+            }
+
+            gameTime--;
+            document.getElementById('game-timer').value = formatTime(gameTime);
+
+            if (activeTeam) {
+                teamTimes[activeTeam]++;
+                document.getElementById(`display${activeTeam}`).innerText = formatTime(teamTimes[activeTeam]);
+            }
+        }
+
+        function resetAll() {
+            location.reload();
+        }
+    </script>
+</body>
+</html>
