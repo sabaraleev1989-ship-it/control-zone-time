@@ -7,8 +7,15 @@
 
     <link rel="icon" type="image/png" href="icon.png">
     <link rel="apple-touch-icon" href="icon.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="icon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="icon.png">
+    <link rel="apple-touch-icon" sizes="167x167" href="icon.png">
+    
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Scorpion.G2">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#0c0c0c">
 
     <style>
         :root {
@@ -29,8 +36,10 @@
             color: #fff;
             -webkit-user-select: none;
             user-select: none;
+            touch-action: manipulation;
         }
 
+        /* ИГРОВЫЕ КНОПКИ (50/50) */
         .team-half {
             flex: 1;
             position: relative;
@@ -51,28 +60,26 @@
             text-transform: uppercase;
             font-weight: bold;
             opacity: 0.4;
-            z-index: 3;
         }
 
         .giant-timer {
-            font-size: clamp(4rem, 20vw, 9rem);
+            font-size: clamp(4rem, 15vw, 8rem);
             font-weight: bold;
             font-family: 'Courier New', monospace;
-            z-index: 5;
+            z-index: 2;
             pointer-events: none;
         }
 
-        .active-a { background-color: var(--team-a-color) !important; animation: pulse 1.2s infinite; }
-        .active-a .giant-timer, .active-a .team-label { color: #000 !important; }
-
-        .active-b { background-color: var(--team-b-color) !important; animation: pulse 1.2s infinite; }
-        .active-b .giant-timer, .active-b .team-label { color: #000 !important; }
+        /* Состояния захвата */
+        .active-a { background-color: var(--team-a-color) !important; color: #000 !important; animation: pulse 1.2s infinite; }
+        .active-b { background-color: var(--team-b-color) !important; color: #000 !important; animation: pulse 1.2s infinite; }
 
         @keyframes pulse {
             0%, 100% { opacity: 1; }
-            50% { opacity: 0.85; }
+            50% { opacity: 0.8; }
         }
 
+        /* МЕНЮ */
         #controls-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -86,60 +93,118 @@
             backdrop-filter: blur(10px);
         }
 
-        .panel-row { display: flex; gap: 30px; align-items: center; flex-wrap: wrap; justify-content: center; }
+        .panel-row {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
 
-        #game-clock { font-size: 5rem; color: #39ff14; font-family: 'Courier New', monospace; }
+        .color-picker-block {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255,255,255,0.05);
+            padding: 15px;
+            border-radius: 15px;
+        }
 
-        .sys-btn { padding: 18px 35px; font-size: 1.3rem; font-weight: bold; border-radius: 10px; border: none; cursor: pointer; text-transform: uppercase; }
+        input[type="color"] {
+            width: 80px; height: 80px;
+            border: 4px solid #444; border-radius: 50%;
+            background: none; cursor: pointer;
+        }
+
+        #game-clock {
+            font-size: 5rem;
+            color: #39ff14;
+            font-family: 'Courier New', monospace;
+            margin: 10px 0;
+        }
+
+        .adjust-btn {
+            font-size: 1.5rem;
+            padding: 15px 25px;
+            background: #333;
+            border: 1px solid #555;
+            color: white;
+            border-radius: 10px;
+            min-width: 100px;
+        }
+
+        .sys-btn {
+            padding: 20px 40px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            text-transform: uppercase;
+        }
 
         #menu-toggle {
             position: fixed;
             bottom: 20px; right: 20px;
-            width: 70px; height: 70px;
+            width: 80px; height: 80px;
             border-radius: 50%;
-            background: rgba(255,255,255,0.15);
-            border: 1px solid rgba(255,255,255,0.3);
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
             color: #fff;
-            font-size: 2rem;
+            font-size: 2.5rem;
             z-index: 90;
-            display: flex; justify-content: center; align-items: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
         }
 
-        .label-text { font-size: 0.7rem; color: #888; letter-spacing: 2px; }
+        .label-text { font-size: 0.8rem; color: #888; text-transform: uppercase; letter-spacing: 2px; }
+
     </style>
 </head>
 <body>
 
     <div id="half-a" class="team-half" onclick="capture(1)">
         <div class="team-label">TEAM A</div>
-        <div id="timer-a" class="giant-timer">00:00</div>
+        <div id="timer-a" class="giant-timer" style="color: var(--team-a-color)">00:00</div>
     </div>
 
     <div id="half-b" class="team-half" onclick="capture(2)">
         <div class="team-label">TEAM B</div>
-        <div id="timer-b" class="giant-timer">00:00</div>
+        <div id="timer-b" class="giant-timer" style="color: var(--team-b-color)">00:00</div>
     </div>
 
     <button id="menu-toggle" onclick="toggleMenu()">⚙</button>
 
     <div id="controls-overlay">
         <div class="panel-row">
+            <div class="color-picker-block">
+                <span class="label-text">ЦВЕТ A</span>
+                <input type="color" id="pick-a" value="#00e5ff" oninput="updateColors()">
+            </div>
+            
             <div style="text-align: center; background: rgba(0,0,0,0.4); padding: 20px; border-radius: 20px;">
-                <span class="label-text">ВРЕМЯ РАУНДА</span>
+                <span class="label-text">ОБЩЕЕ ВРЕМЯ ИГРЫ</span>
                 <div id="game-clock">30:00</div>
-                <div style="display: flex; gap: 10px; justify-content: center;">
-                    <button style="padding:10px" onclick="adj(-60)">-1 МИН</button>
-                    <button style="padding:10px" onclick="adj(60)">+1 МИН</button>
+                <div style="display: flex; gap: 15px; justify-content: center;">
+                    <button class="adjust-btn" onclick="adj(-60)">-1 МИН</button>
+                    <button class="adjust-btn" onclick="adj(60)">+1 МИН</button>
                 </div>
+            </div>
+
+            <div class="color-picker-block">
+                <span class="label-text">ЦВЕТ B</span>
+                <input type="color" id="pick-b" value="#ff3d00" oninput="updateColors()">
             </div>
         </div>
 
         <div class="panel-row" style="margin-top: 20px;">
-            <button id="start-btn" class="sys-btn" style="background: #39ff14; color: #000;" onclick="start()">СТАРТ</button>
+            <button id="start-btn" class="sys-btn" style="background: #39ff14; color: #000; min-width: 250px;" onclick="start()">СТАРТ</button>
             <button class="sys-btn" style="background: #444; color: #fff;" onclick="location.reload()">СБРОС</button>
-            <button class="sys-btn" style="background: #fff; color: #000;" onclick="toggleMenu()">ЗАКРЫТЬ</button>
+            <button class="sys-btn" style="background: #fff; color: #000;" onclick="toggleMenu()">В ИГРУ</button>
         </div>
-        <p style="font-size: 0.7rem; color: #555;">Звук активируется после нажатия СТАРТ</p>
     </div>
 
     <script>
@@ -148,14 +213,7 @@
         let active = null;
         let running = false;
         let interval = null;
-
-        // ЗВУКОВЫЕ ЭФФЕКТЫ
-        // Короткий "бип" для секундного отсчета
-        const tickSound = new Audio('https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3');
-        tickSound.volume = 0.5;
-
-        // Громкая сирена финала
-        const endAlarm = new Audio('https://actions.google.com/sounds/v1/alarms/alarm_clock_ringing_proximity.ogg');
+        const beep = new Audio('https://actions.google.com/sounds/v1/alarms/alarm_clock_ringing_proximity.ogg');
 
         function format(s) {
             let m = Math.floor(s / 60);
@@ -168,6 +226,15 @@
             m.style.display = (m.style.display === 'flex') ? 'none' : 'flex';
         }
 
+        function updateColors() {
+            const ca = document.getElementById('pick-a').value;
+            const cb = document.getElementById('pick-b').value;
+            document.documentElement.style.setProperty('--team-a-color', ca);
+            document.documentElement.style.setProperty('--team-b-color', cb);
+            document.getElementById('timer-a').style.color = ca;
+            document.getElementById('timer-b').style.color = cb;
+        }
+
         function adj(amt) {
             if (running) return;
             gameTime = Math.max(0, gameTime + amt);
@@ -176,18 +243,17 @@
 
         function start() {
             const btn = document.getElementById('start-btn');
-            // Браузеры блокируют звук до первого клика пользователя
-            tickSound.play().then(() => tickSound.pause()); 
-            
             if (running) {
                 running = false;
                 clearInterval(interval);
                 btn.innerText = "ПРОДОЛЖИТЬ";
+                btn.style.background = "#ff9800";
             } else {
                 if (gameTime <= 0) return;
                 running = true;
                 interval = setInterval(tick, 1000);
-                btn.innerText = "ПАУЗА";
+                btn.innerText = "ПАУЗА (ИДЕТ БОЙ)";
+                btn.style.background = "#fff";
                 toggleMenu();
             }
         }
@@ -197,32 +263,25 @@
             active = t;
             document.getElementById('half-a').className = 'team-half' + (t === 1 ? ' active-a' : '');
             document.getElementById('half-b').className = 'team-half' + (t === 2 ? ' active-b' : '');
-            
-            // Сразу воспроизводим звук при клике для отклика
-            tickSound.currentTime = 0;
-            tickSound.play();
         }
 
         function tick() {
             if (gameTime <= 0) {
                 clearInterval(interval);
-                endAlarm.play();
+                beep.play();
                 alert("РАУНД ЗАКОНЧЕН!");
                 return;
             }
-
             gameTime--;
             document.getElementById('game-clock').innerText = format(gameTime);
-            
             if (active) {
-                // Воспроизводим "бип" каждую секунду, если точка захвачена
-                tickSound.currentTime = 0;
-                tickSound.play();
-                
                 teamTimes[active]++;
                 document.getElementById(active === 1 ? 'timer-a' : 'timer-b').innerText = format(teamTimes[active]);
             }
         }
+
+        // Инициализация цветов
+        updateColors();
     </script>
 </body>
 </html>
