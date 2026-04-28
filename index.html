@@ -42,7 +42,7 @@
             align-items: center;
             cursor: pointer;
             z-index: 1;
-            transition: all 0.3s ease;
+            transition: filter 0.3s ease, background-color 0.3s ease;
         }
 
         #half-a { background-color: var(--team-a-color); }
@@ -64,23 +64,33 @@
             font-variant-numeric: tabular-nums;
             z-index: 20;
             pointer-events: none;
+            text-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
 
+        /* УСИЛЕННАЯ АНИМАЦИЯ МИГАНИЯ */
         .active {
             z-index: 5;
-            box-shadow: inset 0 0 100px rgba(0,0,0,0.15);
-            animation: pulse 1.5s infinite;
+            animation: active-flash 1.2s ease-in-out infinite;
         }
 
-        @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.8; }
-            100% { opacity: 1; }
+        @keyframes active-flash {
+            0% { 
+                filter: brightness(1);
+                box-shadow: inset 0 0 0px rgba(255,255,255,0);
+            }
+            50% { 
+                filter: brightness(1.5); /* Сильное осветление */
+                box-shadow: inset 0 0 150px rgba(0,0,0,0.3); /* Глубокая тень */
+            }
+            100% { 
+                filter: brightness(1);
+                box-shadow: inset 0 0 0px rgba(255,255,255,0);
+            }
         }
 
         .dimmed {
-            filter: brightness(0.2);
-            opacity: 0.6 !important;
+            filter: brightness(0.15) grayscale(0.5);
+            opacity: 0.5 !important;
         }
 
         #controls-overlay {
@@ -310,9 +320,8 @@
             }
         }
 
-        // РЕГИСТРАЦИЯ OFFLINE РЕЖИМА С КЭШИРОВАНИЕМ ИКОНКИ
         if ('serviceWorker' in navigator) {
-            const sw = `const C='v3';
+            const sw = `const C='v4';
             self.addEventListener('install',e=>e.waitUntil(caches.open(C).then(c=>c.addAll([location.href, 'icon.png']))));
             self.addEventListener('fetch',e=>e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request))));`;
             const blob = new Blob([sw], {type: 'text/javascript'});
