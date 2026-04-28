@@ -5,10 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Scorpion Tactical G2</title>
 
-    <link rel="icon" type="image/png" href="icon.png">
-    <link rel="apple-touch-icon" href="icon.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#0c0c0c">
 
     <style>
         :root {
@@ -19,7 +18,7 @@
         }
 
         body {
-            font-family: 'Segoe UI', sans-serif;
+            font-family: -apple-system, system-ui, sans-serif;
             background-color: var(--bg-color);
             margin: 0;
             overflow: hidden;
@@ -39,56 +38,49 @@
             justify-content: center;
             align-items: center;
             cursor: pointer;
-            border: 1px solid #222;
             z-index: 1;
-            transition: background-color 0.4s, opacity 0.4s, filter 0.4s, box-shadow 0.4s;
+            transition: all 0.4s ease;
         }
 
-        /* Начальные цвета фона на основе переменных */
         #half-a { background-color: var(--team-a-color); }
         #half-b { background-color: var(--team-b-color); }
 
         .team-label {
             position: absolute;
-            top: 20px; left: 30px;
+            top: 40px; left: 30px;
             font-size: 1.2rem;
             letter-spacing: 5px;
             z-index: 10;
-            color: #fff;
             text-shadow: 0 2px 4px rgba(0,0,0,0.5);
         }
 
         .giant-timer {
-            font-size: clamp(4rem, 20vw, 9rem);
-            font-weight: bold;
-            font-family: 'Courier New', monospace;
+            font-size: clamp(4rem, 22vw, 10rem);
+            font-weight: 800;
+            font-variant-numeric: tabular-nums;
             z-index: 20;
             pointer-events: none;
-            color: #fff;
             text-shadow: 0 4px 10px rgba(0,0,0,0.6);
         }
 
-        /* АНИМАЦИЯ МИГАНИЯ ДЛЯ АКТИВНОЙ КОМАНДЫ */
         @keyframes active-pulse {
             0% { filter: brightness(1.2); }
-            50% { filter: brightness(0.85); }
+            50% { filter: brightness(0.8); }
             100% { filter: brightness(1.2); }
         }
 
         .active {
             animation: active-pulse 1.5s ease-in-out infinite;
             z-index: 5;
-            box-shadow: inset 0 0 50px rgba(255,255,255,0.3);
-            border: 1px solid rgba(255,255,255,0.5);
+            box-shadow: inset 0 0 100px rgba(255,255,255,0.2);
         }
 
-        /* СОСТОЯНИЕ НЕАКТИВНОЙ КОМАНДЫ (ЦВЕТ ВИДЕН, НО ЗАТЕМНЕН) */
         .dimmed {
-            filter: brightness(0.4); /* Умеренное затемнение вместо черного */
-            opacity: 0.7 !important;  /* Хорошая видимость цвета */
+            filter: brightness(0.35) saturate(0.8);
+            opacity: 0.8 !important;
         }
 
-        /* ВЕРТИКАЛЬНОЕ МЕНЮ */
+        /* МЕНЮ */
         #controls-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -98,8 +90,8 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            gap: 20px;
-            backdrop-filter: blur(10px);
+            gap: 25px;
+            backdrop-filter: blur(15px);
         }
 
         .menu-section {
@@ -107,39 +99,47 @@
             flex-direction: column;
             align-items: center;
             width: 85%;
-            background: rgba(255,255,255,0.05);
-            padding: 15px;
-            border-radius: 20px;
+            background: rgba(255,255,255,0.07);
+            padding: 20px;
+            border-radius: 25px;
             gap: 10px;
         }
 
         #game-clock {
-            font-size: 4rem;
+            font-size: 4.5rem;
             color: #39ff14;
-            font-family: 'Courier New', monospace;
+            font-weight: bold;
+        }
+
+        .time-btn {
+            padding: 15px 30px;
+            border-radius: 12px;
+            background: #222;
+            color: #fff;
+            border: 1px solid #444;
+            font-size: 1rem;
         }
 
         input[type="color"] {
-            width: 65px; height: 65px;
+            width: 70px; height: 70px;
             border-radius: 50%;
             border: 3px solid #fff;
             background: none;
-            cursor: pointer;
         }
 
         .sys-btn {
             width: 85%;
-            padding: 18px;
-            font-size: 1.3rem;
+            padding: 20px;
+            font-size: 1.4rem;
             font-weight: bold;
-            border-radius: 12px;
+            border-radius: 15px;
             border: none;
             text-transform: uppercase;
         }
 
         #menu-toggle {
             position: fixed;
-            bottom: 20px; right: 20px;
+            bottom: 30px; right: 30px;
             width: 70px; height: 70px;
             border-radius: 50%;
             background: rgba(255,255,255,0.2);
@@ -167,17 +167,17 @@
 
     <div id="controls-overlay">
         <div class="menu-section">
-            <span style="color:#888">ОБЩЕЕ ВРЕМЯ</span>
+            <span style="color:#aaa; font-size: 0.9rem;">ОБЩЕЕ ВРЕМЯ РАУНДА</span>
             <div id="game-clock">30:00</div>
             <div style="display: flex; gap: 20px;">
-                <button style="padding:12px 25px; border-radius:10px; background:#333; color:#fff; border:none;" onclick="adj(-60)">-1 МИН</button>
-                <button style="padding:12px 25px; border-radius:10px; background:#333; color:#fff; border:none;" onclick="adj(60)">+1 МИН</button>
+                <button class="time-btn" onclick="adj(-60)">-1 МИН</button>
+                <button class="time-btn" onclick="adj(60)">+1 МИН</button>
             </div>
         </div>
 
         <div class="menu-section">
-            <span style="color:#888">ЦВЕТА КОМАНД</span>
-            <div style="display: flex; gap: 50px;">
+            <span style="color:#aaa; font-size: 0.9rem;">ЦВЕТА КОМАНД</span>
+            <div style="display: flex; gap: 60px;">
                 <div style="text-align:center"><input type="color" id="pick-a" value="#00e5ff" oninput="updateColors()"><br>A</div>
                 <div style="text-align:center"><input type="color" id="pick-b" value="#ff3d00" oninput="updateColors()"><br>B</div>
             </div>
@@ -189,14 +189,34 @@
     </div>
 
     <script>
+        // --- ГЕНЕРАТОР ЗВУКА (РАБОТАЕТ БЕЗ ИНТЕРНЕТА) ---
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        
+        function playTone(freq, type, duration, vol) {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + duration);
+        }
+
+        function beepTick() { playTone(800, 'sine', 0.1, 0.1); }
+        function beepEnd() { 
+            playTone(400, 'square', 1, 0.3); 
+            setTimeout(() => playTone(400, 'square', 1, 0.3), 1200);
+        }
+
+        // --- ЛОГИКА ИГРЫ ---
         let gameTime = 1800;
         let teamTimes = [0, 0, 0];
         let active = null;
         let running = false;
         let interval = null;
-
-        const tickSound = new Audio('https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3');
-        const endAlarm = new Audio('https://actions.google.com/sounds/v1/alarms/alarm_clock_ringing_proximity.ogg');
 
         function format(s) {
             let m = Math.floor(s / 60);
@@ -212,10 +232,8 @@
         function updateColors() {
             const ca = document.getElementById('pick-a').value;
             const cb = document.getElementById('pick-b').value;
-            
             document.documentElement.style.setProperty('--team-a-color', ca);
             document.documentElement.style.setProperty('--team-b-color', cb);
-            
             document.getElementById('half-a').style.backgroundColor = ca;
             document.getElementById('half-b').style.backgroundColor = cb;
         }
@@ -227,7 +245,7 @@
         }
 
         function start() {
-            tickSound.play().then(() => tickSound.pause());
+            if (audioCtx.state === 'suspended') audioCtx.resume();
             const btn = document.getElementById('start-btn');
             if (running) {
                 running = false;
@@ -243,11 +261,11 @@
 
         function capture(t) {
             if (!running) return;
+            if (audioCtx.state === 'suspended') audioCtx.resume();
             active = t;
             
             const ha = document.getElementById('half-a');
             const hb = document.getElementById('half-b');
-
             ha.classList.remove('active', 'dimmed');
             hb.classList.remove('active', 'dimmed');
 
@@ -258,28 +276,35 @@
                 hb.classList.add('active');
                 ha.classList.add('dimmed');
             }
-            
-            tickSound.currentTime = 0;
-            tickSound.play();
+            beepTick();
         }
 
         function tick() {
             if (gameTime <= 0) {
                 clearInterval(interval);
-                endAlarm.play();
-                alert("РАУНД ЗАКОНЧЕН!");
+                beepEnd();
+                alert("ВРЕМЯ ИСТЕКЛО!");
                 return;
             }
             gameTime--;
             document.getElementById('game-clock').innerText = format(gameTime);
             if (active) {
-                tickSound.currentTime = 0;
-                tickSound.play();
+                beepTick();
                 teamTimes[active]++;
                 document.getElementById(active === 1 ? 'timer-a' : 'timer-b').innerText = format(teamTimes[active]);
             }
         }
-        
+
+        // --- РЕГИСТРАЦИЯ SERVICE WORKER (ОФФЛАЙН РЕЖИМ) ---
+        if ('serviceWorker' in navigator) {
+            const swCode = `
+                self.addEventListener('install', e => e.waitUntil(caches.open('v1').then(c => c.add(location.href))));
+                self.addEventListener('fetch', e => e.respondWith(caches.match(e.request).then(r => r || fetch(e.request))));
+            `;
+            const blob = new Blob([swCode], {type: 'application/javascript'});
+            navigator.serviceWorker.register(URL.createObjectURL(blob));
+        }
+
         updateColors();
     </script>
 </body>
