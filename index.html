@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Scorpion Tactical G2</title>
 
+    <link rel="icon" type="image/png" href="icon.png">
+    <link rel="apple-touch-icon" href="icon.png">
+    
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#0c0c0c">
@@ -18,7 +21,7 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: -apple-system, system-ui, sans-serif;
             background-color: var(--bg-color);
             margin: 0;
             overflow: hidden;
@@ -28,7 +31,6 @@
             color: #fff;
             -webkit-user-select: none;
             user-select: none;
-            touch-action: manipulation;
         }
 
         .team-half {
@@ -40,11 +42,11 @@
             align-items: center;
             cursor: pointer;
             z-index: 1;
-            transition: filter 0.2s ease, opacity 0.2s ease;
+            transition: all 0.3s ease;
         }
 
-        #half-a { background-color: var(--team-a-color); color: #000; }
-        #half-b { background-color: var(--team-b-color); color: #fff; }
+        #half-a { background-color: var(--team-a-color); }
+        #half-b { background-color: var(--team-b-color); }
 
         .team-label {
             position: absolute;
@@ -62,24 +64,23 @@
             font-variant-numeric: tabular-nums;
             z-index: 20;
             pointer-events: none;
-            text-shadow: 0 4px 10px rgba(0,0,0,0.2);
         }
 
-        @keyframes active-pulse {
+        .active {
+            z-index: 5;
+            box-shadow: inset 0 0 100px rgba(0,0,0,0.15);
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
             0% { opacity: 1; }
             50% { opacity: 0.8; }
             100% { opacity: 1; }
         }
 
-        .active {
-            z-index: 5;
-            box-shadow: inset 0 0 100px rgba(0,0,0,0.1);
-            animation: active-pulse 1s infinite;
-        }
-
         .dimmed {
             filter: brightness(0.2);
-            opacity: 0.5 !important;
+            opacity: 0.6 !important;
         }
 
         #controls-overlay {
@@ -92,8 +93,7 @@
             justify-content: center;
             align-items: center;
             gap: 20px;
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(15px);
         }
 
         .menu-section {
@@ -104,30 +104,21 @@
             background: rgba(255,255,255,0.08);
             padding: 20px;
             border-radius: 25px;
-            gap: 15px;
+            gap: 10px;
         }
 
         #game-clock {
             font-size: 4.5rem;
             color: #39ff14;
             font-weight: bold;
-            font-variant-numeric: tabular-nums;
-        }
-
-        .time-btns {
-            display: flex;
-            gap: 15px;
         }
 
         .time-btn {
             padding: 15px 25px;
-            border-radius: 15px;
+            border-radius: 12px;
             background: #2a2a2a;
             color: #fff;
             border: 1px solid #444;
-            font-size: 1rem;
-            font-weight: bold;
-            active: background: #444;
         }
 
         input[type="color"] {
@@ -135,15 +126,14 @@
             border-radius: 50%;
             border: 3px solid #fff;
             background: none;
-            -webkit-appearance: none;
         }
 
         .sys-btn {
             width: 85%;
-            padding: 20px;
+            padding: 18px;
             font-size: 1.3rem;
             font-weight: bold;
-            border-radius: 20px;
+            border-radius: 18px;
             border: none;
             text-transform: uppercase;
         }
@@ -153,9 +143,9 @@
             bottom: 30px; right: 30px;
             width: 65px; height: 65px;
             border-radius: 50%;
-            background: rgba(150,150,150,0.25);
+            background: rgba(255,255,255,0.2);
             color: #fff;
-            font-size: 1.8rem;
+            font-size: 2rem;
             z-index: 90;
             display: flex; justify-content: center; align-items: center;
             border: 1px solid rgba(255,255,255,0.2);
@@ -178,106 +168,82 @@
 
     <div id="controls-overlay">
         <div class="menu-section">
-            <span style="color:#aaa; font-size: 0.8rem; letter-spacing: 1px;">ОБЩЕЕ ВРЕМЯ</span>
+            <span style="color:#aaa; font-size: 0.9rem;">ВРЕМЯ РАУНДА</span>
             <div id="game-clock">30:00</div>
-            <div class="time-btns">
+            <div style="display: flex; gap: 15px;">
                 <button class="time-btn" onclick="adj(-60)">-1 МИН</button>
                 <button class="time-btn" onclick="adj(60)">+1 МИН</button>
             </div>
         </div>
 
         <div class="menu-section">
-            <span style="color:#aaa; font-size: 0.8rem; letter-spacing: 1px;">ЦВЕТА СТОРОН</span>
+            <span style="color:#aaa; font-size: 0.9rem;">ЦВЕТА</span>
             <div style="display: flex; gap: 50px;">
-                <div style="text-align:center"><input type="color" id="pick-a" value="#ffffff" oninput="updateColors()"><br><small>A</small></div>
-                <div style="text-align:center"><input type="color" id="pick-b" value="#ff3d00" oninput="updateColors()"><br><small>B</small></div>
+                <div style="text-align:center"><input type="color" id="pick-a" value="#ffffff" oninput="updateColors()"><br>A</div>
+                <div style="text-align:center"><input type="color" id="pick-b" value="#ff3d00" oninput="updateColors()"><br>B</div>
             </div>
         </div>
 
         <button id="start-btn" class="sys-btn" style="background: #39ff14; color: #000;" onclick="start()">СТАРТ</button>
-        <button class="sys-btn" style="background: #333; color: #fff;" onclick="resetGame()">СБРОС</button>
+        <button class="sys-btn" style="background: #333; color: #fff;" onclick="location.reload()">СБРОС</button>
         <button class="sys-btn" style="background: #fff; color: #000;" onclick="toggleMenu()">В ИГРУ</button>
     </div>
 
     <script>
-        // Инициализация Audio API (работает локально)
-        const AudioContext = window.AudioContext || window.webkitAudioContext;
-        let audioCtx = null;
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         let sirenOsc1 = null, sirenOsc2 = null, sirenGain = null;
         let sirenActive = false;
 
-        function initAudio() {
-            if (!audioCtx) audioCtx = new AudioContext();
-            if (audioCtx.state === 'suspended') audioCtx.resume();
-        }
-
         function getColorName(hex) {
-            const r = parseInt(hex.slice(1, 3), 16);
-            const g = parseInt(hex.slice(3, 5), 16);
-            const b = parseInt(hex.slice(5, 7), 16);
+            const r = parseInt(hex.slice(1, 3), 16), g = parseInt(hex.slice(3, 5), 16), b = parseInt(hex.slice(5, 7), 16);
             if (r > 230 && g > 230 && b > 230) return "БЕЛЫХ";
-            if (r < 50 && g < 50 && b < 50) return "ЧЕРНЫХ";
-            if (r > 200 && g < 100 && b < 100) return "КРАСНЫХ";
-            if (g > 200 && r < 100 && b < 100) return "ЗЕЛЕНЫХ";
-            if (b > 200 && r < 100 && g < 100) return "СИНИХ";
-            if (r > 200 && g > 180 && b < 100) return "ЖЕЛТЫХ";
+            if (r < 60 && g < 60 && b < 60) return "ЧЕРНЫХ";
+            if (r > 200 && g < 120 && b < 120) return "КРАСНЫХ";
+            if (g > 180 && r < 120 && b < 120) return "ЗЕЛЕНЫХ";
+            if (b > 200 && r < 120 && g < 120) return "СИНИХ";
+            if (r > 200 && g > 180 && b < 120) return "ЖЕЛТЫХ";
             if (g > 180 && b > 180 && r < 150) return "ГОЛУБЫХ";
             return "ЦВЕТНЫХ";
         }
 
         function playTick() {
-            initAudio();
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
             osc.frequency.setValueAtTime(800, audioCtx.currentTime);
             gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
             gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            osc.start();
-            osc.stop(audioCtx.currentTime + 0.1);
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.start(); osc.stop(audioCtx.currentTime + 0.1);
         }
 
         function startSiren() {
-            initAudio();
             if (sirenActive) return;
             sirenActive = true;
             sirenGain = audioCtx.createGain();
             sirenOsc1 = audioCtx.createOscillator();
             sirenOsc2 = audioCtx.createOscillator();
-            sirenOsc1.type = 'sawtooth';
-            sirenOsc2.type = 'square';
-            
+            sirenOsc1.type = 'sawtooth'; sirenOsc2.type = 'square';
             sirenGain.gain.setValueAtTime(0.3, audioCtx.currentTime);
-            sirenOsc1.connect(sirenGain);
-            sirenOsc2.connect(sirenGain);
+            sirenOsc1.connect(sirenGain); sirenOsc2.connect(sirenGain);
             sirenGain.connect(audioCtx.destination);
-
             const loop = () => {
                 if (!sirenActive) return;
                 sirenOsc1.frequency.exponentialRampToValueAtTime(300, audioCtx.currentTime + 0.5);
-                sirenOsc1.frequency.exponentialRampToValueAtTime(700, audioCtx.currentTime + 1.0);
+                sirenOsc1.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 1.0);
                 setTimeout(loop, 1000);
             };
-            sirenOsc1.start();
-            sirenOsc2.start();
-            loop();
+            sirenOsc1.start(); sirenOsc2.start(); loop();
         }
 
         function stopSiren() {
             sirenActive = false;
-            if (sirenOsc1) {
-                sirenOsc1.stop();
-                sirenOsc2.stop();
-                sirenOsc1 = null;
-            }
+            if (sirenOsc1) { sirenOsc1.stop(); sirenOsc2.stop(); sirenOsc1 = null; }
         }
 
         let gameTime = 1800, teamTimes = [0, 0, 0], active = null, running = false, timerId = null;
 
         function format(s) {
-            let m = Math.floor(s / 60);
-            let sec = s % 60;
+            let m = Math.floor(s / 60), sec = s % 60;
             return `${m.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
         }
 
@@ -287,19 +253,16 @@
         }
 
         function updateColors() {
-            const ca = document.getElementById('pick-a').value;
-            const cb = document.getElementById('pick-b').value;
+            const ca = document.getElementById('pick-a').value, cb = document.getElementById('pick-b').value;
             document.documentElement.style.setProperty('--team-a-color', ca);
             document.documentElement.style.setProperty('--team-b-color', cb);
             
-            const ha = document.getElementById('half-a');
-            const hb = document.getElementById('half-b');
-            ha.style.backgroundColor = ca;
-            hb.style.backgroundColor = cb;
+            const ha = document.getElementById('half-a'), hb = document.getElementById('half-b');
+            ha.style.backgroundColor = ca; hb.style.backgroundColor = cb;
 
             const isLight = (hex) => {
                 const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
-                return (r*0.299 + g*0.587 + b*0.114) > 150;
+                return (r*0.299 + g*0.587 + b*0.114) > 160;
             };
             ha.style.color = isLight(ca) ? '#000' : '#fff';
             hb.style.color = isLight(cb) ? '#000' : '#fff';
@@ -315,42 +278,28 @@
         }
 
         function start() {
-            initAudio();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
             const btn = document.getElementById('start-btn');
             if (running) {
-                running = false;
-                clearInterval(timerId);
-                btn.innerText = "ПРОДОЛЖИТЬ";
+                running = false; clearInterval(timerId); btn.innerText = "ПРОДОЛЖИТЬ";
             } else {
-                running = true;
-                timerId = setInterval(tick, 1000);
-                btn.innerText = "ПАУЗА";
-                toggleMenu();
+                running = true; timerId = setInterval(tick, 1000); btn.innerText = "ПАУЗА"; toggleMenu();
             }
         }
 
         function capture(t) {
             if (!running) return;
-            initAudio();
             active = t;
             document.getElementById('half-a').className = 'team-half' + (t === 1 ? ' active' : ' dimmed');
             document.getElementById('half-b').className = 'team-half' + (t === 2 ? ' active' : ' dimmed');
             playTick();
         }
 
-        function resetGame() {
-            if(confirm("Сбросить все время?")) location.reload();
-        }
-
         function tick() {
             if (gameTime <= 0) {
-                clearInterval(timerId);
-                running = false;
+                clearInterval(timerId); running = false;
                 startSiren();
-                setTimeout(() => {
-                    alert("РАУНД ЗАВЕРШЕН!");
-                    stopSiren();
-                }, 100);
+                setTimeout(() => { alert("РАУНД ЗАВЕРШЕН!"); stopSiren(); }, 100);
                 return;
             }
             gameTime--;
@@ -361,21 +310,13 @@
             }
         }
 
-        // --- OFFLINE РЕЖИМ (SERVICE WORKER) ---
+        // РЕГИСТРАЦИЯ OFFLINE РЕЖИМА С КЭШИРОВАНИЕМ ИКОНКИ
         if ('serviceWorker' in navigator) {
-            const swCode = `
-                const CACHE_NAME = 'scorpion-v2';
-                const urlsToCache = [location.href];
-                self.addEventListener('install', event => {
-                    event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache)));
-                });
-                self.addEventListener('fetch', event => {
-                    event.respondWith(caches.match(event.request).then(response => response || fetch(event.request)));
-                });
-            `;
-            const blob = new Blob([swCode], {type: 'application/javascript'});
-            const url = URL.createObjectURL(blob);
-            navigator.serviceWorker.register(url);
+            const sw = `const C='v3';
+            self.addEventListener('install',e=>e.waitUntil(caches.open(C).then(c=>c.addAll([location.href, 'icon.png']))));
+            self.addEventListener('fetch',e=>e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request))));`;
+            const blob = new Blob([sw], {type: 'text/javascript'});
+            navigator.serviceWorker.register(URL.createObjectURL(blob));
         }
 
         updateColors();
