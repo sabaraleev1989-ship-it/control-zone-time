@@ -16,7 +16,8 @@
         :root {
             --bg-color: #0c0c0c;
             --overlay-bg: rgba(10, 10, 10, 0.98);
-            --team-a-color: #00e5ff;
+            /* УСТАНОВЛЕН БЕЛЫЙ ЦВЕТ ПО УМОЛЧАНИЮ ДЛЯ ВЕРХА */
+            --team-a-color: #ffffff;
             --team-b-color: #ff3d00;
         }
 
@@ -45,6 +46,9 @@
             transition: all 0.4s ease;
         }
 
+        #half-a { background-color: var(--team-a-color); color: #000; } /* Черный текст для белого фона */
+        #half-b { background-color: var(--team-b-color); color: #fff; }
+
         .team-label {
             position: absolute;
             top: 40px; left: 30px;
@@ -52,7 +56,7 @@
             font-weight: bold;
             letter-spacing: 2px;
             z-index: 10;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
             text-transform: uppercase;
         }
 
@@ -62,25 +66,24 @@
             font-variant-numeric: tabular-nums;
             z-index: 20;
             pointer-events: none;
-            text-shadow: 0 4px 10px rgba(0,0,0,0.6);
+            text-shadow: 0 4px 10px rgba(0,0,0,0.3);
         }
 
         @keyframes active-pulse {
-            0% { filter: brightness(1.2); }
+            0% { filter: brightness(1.1); }
             50% { filter: brightness(0.8); }
-            100% { filter: brightness(1.2); }
+            100% { filter: brightness(1.1); }
         }
 
         .active {
             animation: active-pulse 1.5s ease-in-out infinite;
             z-index: 5;
-            box-shadow: inset 0 0 100px rgba(255,255,255,0.2);
-            border: 1px solid rgba(255,255,255,0.3);
+            box-shadow: inset 0 0 100px rgba(0,0,0,0.1);
         }
 
         .dimmed {
-            filter: brightness(0.4);
-            opacity: 0.7 !important;
+            filter: brightness(0.3);
+            opacity: 0.6 !important;
         }
 
         #controls-overlay {
@@ -94,6 +97,7 @@
             align-items: center;
             gap: 25px;
             backdrop-filter: blur(15px);
+            color: #fff;
         }
 
         .menu-section {
@@ -143,12 +147,12 @@
             bottom: 30px; right: 30px;
             width: 70px; height: 70px;
             border-radius: 50%;
-            background: rgba(255,255,255,0.2);
+            background: rgba(100,100,100,0.3);
             color: #fff;
             font-size: 2rem;
             z-index: 90;
             display: flex; justify-content: center; align-items: center;
-            border: 1px solid rgba(255,255,255,0.3);
+            border: 1px solid rgba(255,255,255,0.2);
         }
     </style>
 </head>
@@ -179,7 +183,7 @@
         <div class="menu-section">
             <span style="color:#aaa; font-size: 0.9rem;">ЦВЕТА КОМАНД</span>
             <div style="display: flex; gap: 60px;">
-                <div style="text-align:center"><input type="color" id="pick-a" value="#00e5ff" oninput="updateColors()"><br>A</div>
+                <div style="text-align:center"><input type="color" id="pick-a" value="#ffffff" oninput="updateColors()"><br>A</div>
                 <div style="text-align:center"><input type="color" id="pick-b" value="#ff3d00" oninput="updateColors()"><br>B</div>
             </div>
         </div>
@@ -191,23 +195,22 @@
 
     <script>
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        let sirenOsc1 = null;
-        let sirenOsc2 = null;
-        let sirenGain = null;
+        let sirenOsc1 = null, sirenOsc2 = null, sirenGain = null;
         let sirenActive = false;
 
         function getColorName(hex) {
             const r = parseInt(hex.slice(1, 3), 16);
             const g = parseInt(hex.slice(3, 5), 16);
             const b = parseInt(hex.slice(5, 7), 16);
+            
+            // Расширенная логика детекции цветов
+            if (r > 230 && g > 230 && b > 230) return "БЕЛЫХ";
+            if (r < 50 && g < 50 && b < 50) return "ЧЕРНЫХ";
             if (r > 200 && g < 100 && b < 100) return "КРАСНЫХ";
             if (g > 200 && r < 100 && b < 100) return "ЗЕЛЕНЫХ";
             if (b > 200 && r < 100 && g < 100) return "СИНИХ";
-            if (r > 200 && g > 200 && b < 100) return "ЖЕЛТЫХ";
-            if (r > 200 && b > 200 && g < 100) return "ФИОЛЕТОВЫХ";
+            if (r > 200 && g > 180 && b < 100) return "ЖЕЛТЫХ";
             if (g > 180 && b > 180 && r < 150) return "ГОЛУБЫХ";
-            if (r > 200 && g > 150 && b < 100) return "ОРАНЖЕВЫХ";
-            if (r > 220 && g > 220 && b > 220) return "БЕЛЫХ";
             return "ЦВЕТНЫХ";
         }
 
@@ -227,21 +230,13 @@
         function startInfiniteSiren() {
             if (sirenActive) return;
             sirenActive = true;
-
             sirenGain = audioCtx.createGain();
             sirenGain.gain.setValueAtTime(0, audioCtx.currentTime);
             sirenGain.gain.linearRampToValueAtTime(0.4, audioCtx.currentTime + 0.2);
-
             sirenOsc1 = audioCtx.createOscillator();
             sirenOsc2 = audioCtx.createOscillator();
-
             sirenOsc1.type = 'sawtooth';
             sirenOsc2.type = 'square';
-
-            sirenOsc1.frequency.setValueAtTime(300, audioCtx.currentTime);
-            sirenOsc2.frequency.setValueAtTime(305, audioCtx.currentTime);
-
-            // Циклическое изменение частоты (эффект сирены)
             const changeFreq = () => {
                 if (!sirenActive) return;
                 const now = audioCtx.currentTime;
@@ -251,11 +246,9 @@
                 sirenOsc2.frequency.exponentialRampToValueAtTime(305, now + 2);
                 setTimeout(changeFreq, 2000);
             };
-
             sirenOsc1.connect(sirenGain);
             sirenOsc2.connect(sirenGain);
             sirenGain.connect(audioCtx.destination);
-
             sirenOsc1.start();
             sirenOsc2.start();
             changeFreq();
@@ -268,18 +261,12 @@
                 setTimeout(() => {
                     if (sirenOsc1) sirenOsc1.stop();
                     if (sirenOsc2) sirenOsc2.stop();
-                    sirenOsc1 = null;
-                    sirenOsc2 = null;
-                    sirenGain = null;
+                    sirenOsc1 = sirenOsc2 = sirenGain = null;
                 }, 200);
             }
         }
 
-        let gameTime = 1800;
-        let teamTimes = [0, 0, 0];
-        let active = null;
-        let running = false;
-        let timerId = null;
+        let gameTime = 1800, teamTimes = [0, 0, 0], active = null, running = false, timerId = null;
 
         function format(s) {
             let m = Math.floor(s / 60);
@@ -297,8 +284,20 @@
             const cb = document.getElementById('pick-b').value;
             document.documentElement.style.setProperty('--team-a-color', ca);
             document.documentElement.style.setProperty('--team-b-color', cb);
-            document.getElementById('half-a').style.backgroundColor = ca;
-            document.getElementById('half-b').style.backgroundColor = cb;
+            
+            const ha = document.getElementById('half-a');
+            const hb = document.getElementById('half-b');
+            ha.style.backgroundColor = ca;
+            hb.style.backgroundColor = cb;
+
+            // Адаптация цвета текста (черный на светлом, белый на темном)
+            const isLight = (hex) => {
+                const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+                return (r*0.299 + g*0.587 + b*0.114) > 186;
+            };
+            ha.style.color = isLight(ca) ? '#000' : '#fff';
+            hb.style.color = isLight(cb) ? '#000' : '#fff';
+
             document.getElementById('label-a').innerText = `СТОРОНА «${getColorName(ca)}»`;
             document.getElementById('label-b').innerText = `СТОРОНА «${getColorName(cb)}»`;
         }
@@ -339,7 +338,6 @@
                 running = false;
                 startInfiniteSiren();
                 setTimeout(() => {
-                    // Сирена звучит, пока не нажмут ОК
                     alert("ВРЕМЯ ИСТЕКЛО! РАУНД ЗАВЕРШЕН.");
                     stopInfiniteSiren();
                 }, 100);
