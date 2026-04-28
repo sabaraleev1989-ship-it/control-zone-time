@@ -42,9 +42,14 @@
             cursor: pointer;
             border: 1px solid #222;
             z-index: 1;
-            background-color: rgba(0,0,0,0.3); /* Базовый темный фон */
-            transition: background-color 0.3s, opacity 0.3s;
+            transition: background-color 0.4s, opacity 0.4s;
+            /* По умолчанию кнопки имеют свой цвет, но очень тускло */
+            background-color: rgba(0, 0, 0, 0.8); 
         }
+
+        /* Цвета для неактивных состояний (просто тусклая подсветка фона) */
+        #half-a { border-bottom: 2px solid var(--team-a-color); }
+        #half-b { border-top: 2px solid var(--team-b-color); }
 
         .team-label {
             position: absolute;
@@ -52,7 +57,7 @@
             font-size: 1.2rem;
             letter-spacing: 5px;
             z-index: 10;
-            opacity: 0.6;
+            opacity: 0.5;
         }
 
         .giant-timer {
@@ -61,38 +66,41 @@
             font-family: 'Courier New', monospace;
             z-index: 20;
             pointer-events: none;
-            transition: color 0.3s;
+            transition: color 0.4s;
         }
 
-        /* МЯГКОЕ МОРГАНИЕ (PULSE) */
-        @keyframes soft-pulse {
-            0% { background-color: currentColor; }
-            50% { background-color: rgba(0,0,0,0.5); }
-            100% { background-color: currentColor; }
+        /* ПЛАВНОЕ МЕРЦАНИЕ */
+        @keyframes soft-glow {
+            0% { background-color: var(--active-color); }
+            50% { background-color: rgba(0, 0, 0, 0.6); }
+            100% { background-color: var(--active-color); }
         }
 
-        /* Активная команда: яркий фон и белые цифры */
+        /* Состояние АКТИВНОЙ команды */
         .active-a { 
-            color: var(--team-a-color);
-            animation: soft-pulse 1s ease-in-out infinite; 
-            opacity: 1;
+            --active-color: var(--team-a-color);
+            animation: soft-glow 1.5s ease-in-out infinite;
+            opacity: 1 !important;
         }
         .active-b { 
-            color: var(--team-b-color);
-            animation: soft-pulse 1s ease-in-out infinite; 
+            --active-color: var(--team-b-color);
+            animation: soft-glow 1.5s ease-in-out infinite;
+            opacity: 1 !important;
+        }
+
+        /* Текст активной команды всегда белый и яркий */
+        .active-a .giant-timer, .active-b .giant-timer,
+        .active-a .team-label, .active-b .team-label { 
+            color: #fff !important; 
             opacity: 1;
         }
 
-        /* Стили текста при активации */
-        .active-a .giant-timer, .active-b .giant-timer { color: #fff !important; }
-        .active-a .team-label, .active-b .team-label { color: #fff !important; opacity: 1; }
+        /* Состояние НЕАКТИВНОЙ команды */
+        /* Вместо черного фона — сохраняем цвет команды, но делаем его очень темным */
+        .inactive-a { background-color: rgba(0, 229, 255, 0.05) !important; opacity: 0.4; }
+        .inactive-b { background-color: rgba(255, 61, 0, 0.05) !important; opacity: 0.4; }
 
-        /* Неактивная команда: тусклый цвет */
-        .inactive {
-            opacity: 0.25; /* Делаем кнопку полупрозрачной и темной */
-        }
-
-        /* ВЕРТИКАЛЬНОЕ МЕНЮ */
+        /* Настройка вертикального меню */
         #controls-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -123,19 +131,6 @@
             font-family: 'Courier New', monospace;
         }
 
-        .color-row {
-            display: flex;
-            justify-content: space-around;
-            width: 100%;
-        }
-
-        input[type="color"] {
-            width: 60px; height: 60px;
-            border-radius: 50%;
-            border: 2px solid #fff;
-            background: none;
-        }
-
         .sys-btn {
             width: 85%;
             padding: 18px;
@@ -144,6 +139,7 @@
             border-radius: 12px;
             border: none;
             text-transform: uppercase;
+            cursor: pointer;
         }
 
         #menu-toggle {
@@ -178,14 +174,14 @@
             <span style="color:#888">ВРЕМЯ РАУНДА</span>
             <div id="game-clock">30:00</div>
             <div style="display: flex; gap: 20px;">
-                <button style="padding:10px 20px;" onclick="adj(-60)">-1 МИН</button>
-                <button style="padding:10px 20px;" onclick="adj(60)">+1 МИН</button>
+                <button style="padding:10px 20px; background:#333; color:#fff; border:none; border-radius:8px;" onclick="adj(-60)">-1 МИН</button>
+                <button style="padding:10px 20px; background:#333; color:#fff; border:none; border-radius:8px;" onclick="adj(60)">+1 МИН</button>
             </div>
         </div>
 
         <div class="menu-section">
             <span style="color:#888">ЦВЕТА КОМАНД</span>
-            <div class="color-row">
+            <div style="display: flex; gap: 40px;">
                 <div style="text-align:center"><input type="color" id="pick-a" value="#00e5ff" oninput="updateColors()"><br>A</div>
                 <div style="text-align:center"><input type="color" id="pick-b" value="#ff3d00" oninput="updateColors()"><br>B</div>
             </div>
@@ -193,7 +189,7 @@
 
         <button id="start-btn" class="sys-btn" style="background: #39ff14; color: #000;" onclick="start()">СТАРТ</button>
         <button class="sys-btn" style="background: #444; color: #fff;" onclick="location.reload()">СБРОС</button>
-        <button class="sys-btn" style="background: #fff; color: #000;" onclick="toggleMenu()">ЗАКРЫТЬ</button>
+        <button class="sys-btn" style="background: #fff; color: #000;" onclick="toggleMenu()">В ИГРУ</button>
     </div>
 
     <script>
@@ -223,7 +219,7 @@
             document.documentElement.style.setProperty('--team-a-color', ca);
             document.documentElement.style.setProperty('--team-b-color', cb);
             
-            // Если игра не идет или точка не захвачена, просто красим цифры
+            // Если точка не активна, цифры подсвечены выбранным цветом
             if (active !== 1) document.getElementById('timer-a').style.color = ca;
             if (active !== 2) document.getElementById('timer-b').style.color = cb;
         }
@@ -256,16 +252,16 @@
             const ha = document.getElementById('half-a');
             const hb = document.getElementById('half-b');
 
-            // Сброс классов
+            // Полный сброс стилей перед применением
             ha.className = 'team-half';
             hb.className = 'team-half';
 
             if (t === 1) {
                 ha.classList.add('active-a');
-                hb.classList.add('inactive');
+                hb.classList.add('inactive-b'); // Нижняя становится тусклой, но сохраняет оттенок B
             } else {
                 hb.classList.add('active-b');
-                ha.classList.add('inactive');
+                ha.classList.add('inactive-a'); // Верхняя становится тусклой, но сохраняет оттенок A
             }
             
             updateColors();
