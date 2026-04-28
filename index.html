@@ -42,6 +42,8 @@
             cursor: pointer;
             border: 1px solid #222;
             z-index: 1;
+            background-color: rgba(0,0,0,0.3); /* Базовый темный фон */
+            transition: background-color 0.3s, opacity 0.3s;
         }
 
         .team-label {
@@ -49,8 +51,8 @@
             top: 20px; left: 30px;
             font-size: 1.2rem;
             letter-spacing: 5px;
-            opacity: 0.4;
             z-index: 10;
+            opacity: 0.6;
         }
 
         .giant-timer {
@@ -59,26 +61,36 @@
             font-family: 'Courier New', monospace;
             z-index: 20;
             pointer-events: none;
+            transition: color 0.3s;
         }
 
-        /* ИНТЕНСИВНОЕ МОРГАНИЕ (STROBE) */
-        @keyframes strobe {
-            0% { background-color: var(--bg-color); }
-            50% { background-color: currentColor; }
-            100% { background-color: var(--bg-color); }
+        /* МЯГКОЕ МОРГАНИЕ (PULSE) */
+        @keyframes soft-pulse {
+            0% { background-color: currentColor; }
+            50% { background-color: rgba(0,0,0,0.5); }
+            100% { background-color: currentColor; }
         }
 
+        /* Активная команда: яркий фон и белые цифры */
         .active-a { 
             color: var(--team-a-color);
-            animation: strobe 0.2s steps(2, start) infinite; 
+            animation: soft-pulse 1s ease-in-out infinite; 
+            opacity: 1;
         }
-        .active-a .giant-timer, .active-a .team-label { color: #fff !important; text-shadow: 0 0 20px #000; }
-
         .active-b { 
             color: var(--team-b-color);
-            animation: strobe 0.2s steps(2, start) infinite; 
+            animation: soft-pulse 1s ease-in-out infinite; 
+            opacity: 1;
         }
-        .active-b .giant-timer, .active-b .team-label { color: #fff !important; text-shadow: 0 0 20px #000; }
+
+        /* Стили текста при активации */
+        .active-a .giant-timer, .active-b .giant-timer { color: #fff !important; }
+        .active-a .team-label, .active-b .team-label { color: #fff !important; opacity: 1; }
+
+        /* Неактивная команда: тусклый цвет */
+        .inactive {
+            opacity: 0.25; /* Делаем кнопку полупрозрачной и темной */
+        }
 
         /* ВЕРТИКАЛЬНОЕ МЕНЮ */
         #controls-overlay {
@@ -91,15 +103,14 @@
             justify-content: flex-start;
             align-items: center;
             padding-top: 40px;
-            gap: 25px;
-            overflow-y: auto;
+            gap: 20px;
         }
 
         .menu-section {
             display: flex;
             flex-direction: column;
             align-items: center;
-            width: 90%;
+            width: 85%;
             background: rgba(255,255,255,0.05);
             padding: 15px;
             border-radius: 20px;
@@ -116,22 +127,21 @@
             display: flex;
             justify-content: space-around;
             width: 100%;
-            gap: 20px;
         }
 
         input[type="color"] {
-            width: 70px; height: 70px;
+            width: 60px; height: 60px;
             border-radius: 50%;
-            border: 3px solid #fff;
+            border: 2px solid #fff;
             background: none;
         }
 
         .sys-btn {
-            width: 100%;
-            padding: 20px;
-            font-size: 1.4rem;
+            width: 85%;
+            padding: 18px;
+            font-size: 1.3rem;
             font-weight: bold;
-            border-radius: 15px;
+            border-radius: 12px;
             border: none;
             text-transform: uppercase;
         }
@@ -168,8 +178,8 @@
             <span style="color:#888">ВРЕМЯ РАУНДА</span>
             <div id="game-clock">30:00</div>
             <div style="display: flex; gap: 20px;">
-                <button style="padding:15px 25px; border-radius:10px" onclick="adj(-60)">-1 МИН</button>
-                <button style="padding:15px 25px; border-radius:10px" onclick="adj(60)">+1 МИН</button>
+                <button style="padding:10px 20px;" onclick="adj(-60)">-1 МИН</button>
+                <button style="padding:10px 20px;" onclick="adj(60)">+1 МИН</button>
             </div>
         </div>
 
@@ -181,11 +191,9 @@
             </div>
         </div>
 
-        <div style="width: 90%; display: flex; flex-direction: column; gap: 15px;">
-            <button id="start-btn" class="sys-btn" style="background: #39ff14; color: #000;" onclick="start()">СТАРТ</button>
-            <button class="sys-btn" style="background: #444; color: #fff;" onclick="location.reload()">СБРОС</button>
-            <button class="sys-btn" style="background: #fff; color: #000;" onclick="toggleMenu()">ЗАКРЫТЬ</button>
-        </div>
+        <button id="start-btn" class="sys-btn" style="background: #39ff14; color: #000;" onclick="start()">СТАРТ</button>
+        <button class="sys-btn" style="background: #444; color: #fff;" onclick="location.reload()">СБРОС</button>
+        <button class="sys-btn" style="background: #fff; color: #000;" onclick="toggleMenu()">ЗАКРЫТЬ</button>
     </div>
 
     <script>
@@ -214,8 +222,10 @@
             const cb = document.getElementById('pick-b').value;
             document.documentElement.style.setProperty('--team-a-color', ca);
             document.documentElement.style.setProperty('--team-b-color', cb);
-            if(active !== 1) document.getElementById('timer-a').style.color = ca;
-            if(active !== 2) document.getElementById('timer-b').style.color = cb;
+            
+            // Если игра не идет или точка не захвачена, просто красим цифры
+            if (active !== 1) document.getElementById('timer-a').style.color = ca;
+            if (active !== 2) document.getElementById('timer-b').style.color = cb;
         }
 
         function adj(amt) {
@@ -242,8 +252,23 @@
         function capture(t) {
             if (!running) return;
             active = t;
-            document.getElementById('half-a').className = 'team-half' + (t === 1 ? ' active-a' : '');
-            document.getElementById('half-b').className = 'team-half' + (t === 2 ? ' active-b' : '');
+            
+            const ha = document.getElementById('half-a');
+            const hb = document.getElementById('half-b');
+
+            // Сброс классов
+            ha.className = 'team-half';
+            hb.className = 'team-half';
+
+            if (t === 1) {
+                ha.classList.add('active-a');
+                hb.classList.add('inactive');
+            } else {
+                hb.classList.add('active-b');
+                ha.classList.add('inactive');
+            }
+            
+            updateColors();
             tickSound.currentTime = 0;
             tickSound.play();
         }
