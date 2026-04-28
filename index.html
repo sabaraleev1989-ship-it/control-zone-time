@@ -2,19 +2,26 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tactical Control Point</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Scorpion.Gen2 Tactical Clock</title>
+    
+    <link rel="icon" type="image/png" href="icon.png">
+    <link rel="apple-touch-icon" href="icon.png">
+    
     <style>
         :root {
-            --bg-color: #1a1a1a;
-            --panel-color: #2d2d2d;
-            --text-color: #e0e0e0;
+            --bg-color: #0f0f0f;
+            --panel-color: #1a1a1a;
+            --accent-blue: #00d2ff;
+            --accent-red: #ff2e2e;
+            --accent-green: #39ff14;
+            --border-color: #333;
         }
 
         body {
-            font-family: 'Courier New', Courier, monospace;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             background-color: var(--bg-color);
-            color: var(--text-color);
+            color: #fff;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -22,193 +29,272 @@
             height: 100vh;
             margin: 0;
             overflow: hidden;
+            -webkit-user-select: none;
+            user-select: none;
         }
 
-        .main-container {
+        .header-title {
+            font-size: 1.5rem;
+            letter-spacing: 5px;
+            color: #444;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .main-layout {
             display: flex;
-            gap: 20px;
-            align-items: center;
-            background: var(--panel-color);
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            gap: 15px;
+            align-items: stretch;
+            width: 95vw;
+            max-width: 900px;
+            height: 70vh;
         }
 
-        .team-panel {
+        /* Панели команд */
+        .team-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            background: var(--panel-color);
+            padding: 15px;
+            border-radius: 12px;
+            border: 2px solid var(--border-color);
+            align-items: center;
+        }
+
+        .team-timer {
+            font-size: 3.5rem;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        /* Огромные квадратные кнопки */
+        .capture-btn {
+            flex-grow: 1;
+            width: 100%;
+            border: 4px solid #333;
+            border-radius: 10px;
+            background: #222;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .capture-btn::after {
+            content: 'ЗАХВАТ';
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: rgba(255,255,255,0.2);
+        }
+
+        /* Центр управления */
+        .center-controls {
+            width: 260px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            background: #111;
+            padding: 15px;
+            border-radius: 12px;
+            border: 2px solid #444;
+        }
+
+        /* Настройка времени кнопками */
+        .time-setter {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 15px;
+            gap: 5px;
         }
 
-        .timer-display {
-            font-size: 3rem;
-            font-weight: bold;
-            text-shadow: 0 0 10px rgba(0,0,0,0.5);
+        .setter-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
-        .control-btn {
-            width: 150px;
-            height: 150px;
-            border-radius: 50%;
-            border: 5px solid #444;
+        .set-btn {
+            width: 45px;
+            height: 45px;
+            background: #333;
+            border: 1px solid #555;
+            color: white;
+            font-size: 1.5rem;
+            border-radius: 5px;
             cursor: pointer;
-            outline: none;
-            transition: transform 0.1s;
-            background-color: #555;
         }
 
-        .control-btn:active {
-            transform: scale(0.95);
-        }
+        .set-btn:active { background: #555; }
 
-        .active-blink {
-            animation: blink 1s infinite;
-        }
-
-        @keyframes blink {
-            0% { opacity: 1; box-shadow: 0 0 20px currentColor; }
-            50% { opacity: 0.5; box-shadow: 0 0 5px currentColor; }
-            100% { opacity: 1; box-shadow: 0 0 20px currentColor; }
-        }
-
-        .game-master {
-            text-align: center;
-            border-left: 2px solid #444;
-            border-right: 2px solid #444;
-            padding: 0 40px;
-        }
-
-        #game-timer {
+        #main-display {
             font-size: 4rem;
-            background: none;
-            border: 1px dashed #666;
-            color: #00ff00;
-            text-align: center;
-            width: 200px;
+            color: var(--accent-green);
+            font-family: 'Courier New', monospace;
+            text-shadow: 0 0 15px rgba(57, 255, 20, 0.4);
+            margin: 15px 0;
+        }
+
+        /* Системные кнопки */
+        .action-btn {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            text-transform: uppercase;
             margin-bottom: 10px;
         }
 
-        input[type="color"] {
-            width: 50px;
-            height: 30px;
-            border: none;
-            cursor: pointer;
-            background: none;
+        .start-btn { background: var(--accent-green); color: #000; }
+        .reset-btn { background: #444; color: #ccc; }
+
+        /* Анимации мигания */
+        .blink-blue { animation: bg-blue 1s infinite; border-color: var(--accent-blue); }
+        .blink-red { animation: bg-red 1s infinite; border-color: var(--accent-red); }
+
+        @keyframes bg-blue {
+            0%, 100% { background: #002b36; }
+            50% { background: var(--accent-blue); }
+        }
+        @keyframes bg-red {
+            0%, 100% { background: #360000; }
+            50% { background: var(--accent-red); }
         }
 
-        .status-label {
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
+        .color-label { font-size: 0.7rem; color: #666; margin-top: 5px; }
+
     </style>
 </head>
 <body>
 
-    <div class="main-container">
-        <div class="team-panel">
-            <input type="color" id="color1" value="#ff0000">
-            <div id="display1" class="timer-display">00:00</div>
-            <button id="btn1" class="control-btn" onclick="toggleTimer(1)"></button>
-            <div class="status-label">Сторона А</div>
+    <div class="header-title">SCORPION.GEN2</div>
+
+    <div class="main-layout">
+        <div class="team-section">
+            <input type="color" id="c1" value="#00d2ff">
+            <div id="t1" class="team-timer" style="color: var(--accent-blue)">00:00</div>
+            <button id="b1" class="capture-btn" onclick="capture(1)"></button>
+            <div class="color-label">TEAM A</div>
         </div>
 
-        <div class="game-master">
-            <div class="status-label">Время игры</div>
-            <input type="text" id="game-timer" value="30:00" onchange="updateGameTime(this.value)">
-            <br>
-            <button onclick="startGame()" style="padding: 10px 20px; cursor:pointer;">СТАРТ / ПАУЗА</button>
-            <button onclick="resetAll()" style="padding: 10px 20px; cursor:pointer;">СБРОС</button>
+        <div class="center-controls">
+            <div class="time-setter">
+                <span class="color-label">УСТАНОВКА ВРЕМЕНИ</span>
+                <div class="setter-row">
+                    <button class="set-btn" onclick="adjustTime(60)">+</button>
+                    <button class="set-btn" onclick="adjustTime(-60)">-</button>
+                    <span style="font-size: 0.8rem">МИН</span>
+                </div>
+                <div id="main-display">30:00</div>
+                <div class="setter-row">
+                    <button class="set-btn" onclick="adjustTime(10)">+</button>
+                    <button class="set-btn" onclick="adjustTime(-10)">-</button>
+                    <span style="font-size: 0.8rem">СЕК</span>
+                </div>
+            </div>
+
+            <div class="system-actions">
+                <button id="state-btn" class="action-btn start-btn" onclick="toggleGame()">СТАРТ</button>
+                <button class="action-btn reset-btn" onclick="reset()">СБРОС</button>
+            </div>
         </div>
 
-        <div class="team-panel">
-            <input type="color" id="color2" value="#0000ff">
-            <div id="display2" class="timer-display">00:00</div>
-            <button id="btn2" class="control-btn" onclick="toggleTimer(2)"></button>
-            <div class="status-label">Сторона Б</div>
+        <div class="team-section">
+            <input type="color" id="c2" value="#ff2e2e">
+            <div id="t2" class="team-timer" style="color: var(--accent-red)">00:00</div>
+            <button id="b2" class="capture-btn" onclick="capture(2)"></button>
+            <div class="color-label">TEAM B</div>
         </div>
     </div>
 
     <script>
-        let gameTime = 1800; // 30 минут в секундах
-        let teamTimes = [0, 0, 0]; // Индексы 1 и 2 для команд
-        let activeTeam = null;
-        let gameRunning = false;
-        let interval = null;
+        let totalTime = 1800; 
+        let teamTimes = [0, 0, 0];
+        let active = null;
+        let running = false;
+        let timer = null;
+        const alarm = new Audio('https://actions.google.com/sounds/v1/alarms/alarm_clock_ringing_proximity.ogg');
 
-        // Звуковой сигнал
-        const beep = new Audio('https://actions.google.com/sounds/v1/alarms/alarm_clock_ringing_proximity.ogg');
-
-        function formatTime(s) {
-            let mins = Math.floor(s / 60);
-            let secs = s % 60;
-            return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        function format(s) {
+            let m = Math.floor(s / 60);
+            let sec = s % 60;
+            return `${m.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
         }
 
-        function updateGameTime(val) {
-            let parts = val.split(':');
-            if(parts.length === 2) {
-                gameTime = parseInt(parts[0]) * 60 + parseInt(parts[1]);
+        function adjustTime(amount) {
+            if (running) return;
+            totalTime = Math.max(0, totalTime + amount);
+            document.getElementById('main-display').innerText = format(totalTime);
+        }
+
+        function toggleGame() {
+            const btn = document.getElementById('state-btn');
+            if (running) {
+                running = false;
+                clearInterval(timer);
+                btn.innerText = "ПРОДОЛЖИТЬ";
+                btn.style.background = "orange";
+            } else {
+                if (totalTime <= 0) return;
+                running = true;
+                timer = setInterval(tick, 1000);
+                btn.innerText = "ПАУЗА";
+                btn.style.background = "#333";
+                btn.style.color = "#fff";
             }
         }
 
-        function toggleTimer(team) {
-            if (!gameRunning) return; // Не считать, пока игра не начата
-            activeTeam = team;
+        function capture(team) {
+            if (!running) return;
+            active = team;
+            const b1 = document.getElementById('b1');
+            const b2 = document.getElementById('b2');
             
-            // Визуальное переключение
-            const b1 = document.getElementById('btn1');
-            const b2 = document.getElementById('btn2');
-            const c1 = document.getElementById('color1').value;
-            const c2 = document.getElementById('color2').value;
+            b1.classList.remove('blink-blue');
+            b2.classList.remove('blink-red');
+            b1.style.background = "#222";
+            b2.style.background = "#222";
 
             if (team === 1) {
-                b1.classList.add('active-blink');
-                b1.style.backgroundColor = c1;
-                b1.style.color = c1;
-                b2.classList.remove('active-blink');
-                b2.style.backgroundColor = '#555';
+                b1.classList.add('blink-blue');
+                document.documentElement.style.setProperty('--accent-blue', document.getElementById('c1').value);
             } else {
-                b2.classList.add('active-blink');
-                b2.style.backgroundColor = c2;
-                b2.style.color = c2;
-                b1.classList.remove('active-blink');
-                b1.style.backgroundColor = '#555';
-            }
-        }
-
-        function startGame() {
-            if (gameRunning) {
-                gameRunning = false;
-                clearInterval(interval);
-            } else {
-                gameRunning = true;
-                interval = setInterval(tick, 1000);
+                b2.classList.add('blink-red');
+                document.documentElement.style.setProperty('--accent-red', document.getElementById('c2').value);
             }
         }
 
         function tick() {
-            if (gameTime <= 0) {
-                clearInterval(interval);
-                gameRunning = false;
-                beep.play();
-                alert("ВРЕМЯ ВЫШЛО!");
+            if (totalTime <= 0) {
+                clearInterval(timer);
+                alarm.play();
+                alert("ВРЕМЯ ИСТЕКЛО!");
                 return;
             }
-
-            gameTime--;
-            document.getElementById('game-timer').value = formatTime(gameTime);
-
-            if (activeTeam) {
-                teamTimes[activeTeam]++;
-                document.getElementById(`display${activeTeam}`).innerText = formatTime(teamTimes[activeTeam]);
+            totalTime--;
+            document.getElementById('main-display').innerText = format(totalTime);
+            
+            if (active) {
+                teamTimes[active]++;
+                document.getElementById('t' + active).innerText = format(teamTimes[active]);
             }
         }
 
-        function resetAll() {
-            location.reload();
+        function reset() {
+            if (confirm("Сбросить игру?")) location.reload();
         }
+
+        // Обновление цветов текста при выборе
+        document.getElementById('c1').onchange = (e) => document.getElementById('t1').style.color = e.target.value;
+        document.getElementById('c2').onchange = (e) => document.getElementById('t2').style.color = e.target.value;
     </script>
 </body>
 </html>
