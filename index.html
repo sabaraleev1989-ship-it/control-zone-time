@@ -51,10 +51,12 @@
         .team-label {
             position: absolute;
             top: 40px; left: 30px;
-            font-size: 1.2rem;
-            letter-spacing: 5px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            letter-spacing: 2px;
             z-index: 10;
             text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            text-transform: uppercase;
         }
 
         .giant-timer {
@@ -156,12 +158,12 @@
 <body>
 
     <div id="half-a" class="team-half" onclick="capture(1)">
-        <div class="team-label">TEAM A</div>
+        <div id="label-a" class="team-label">СТОРОНА «...»</div>
         <div id="timer-a" class="giant-timer">00:00</div>
     </div>
 
     <div id="half-b" class="team-half" onclick="capture(2)">
-        <div class="team-label">TEAM B</div>
+        <div id="label-b" class="team-label">СТОРОНА «...»</div>
         <div id="timer-b" class="giant-timer">00:00</div>
     </div>
 
@@ -195,6 +197,23 @@
         let alarmOsc = null;
         let alarmGain = null;
 
+        // Определение названия цвета
+        function getColorName(hex) {
+            const r = parseInt(hex.slice(1, 3), 16);
+            const g = parseInt(hex.slice(3, 5), 16);
+            const b = parseInt(hex.slice(5, 7), 16);
+
+            if (r > 200 && g < 100 && b < 100) return "КРАСНЫХ";
+            if (g > 200 && r < 100 && b < 100) return "ЗЕЛЕНЫХ";
+            if (b > 200 && r < 100 && g < 100) return "СИНИХ";
+            if (r > 200 && g > 200 && b < 100) return "ЖЕЛТЫХ";
+            if (r > 200 && b > 200 && g < 100) return "ФИОЛЕТОВЫХ";
+            if (g > 180 && b > 180 && r < 150) return "ГОЛУБЫХ";
+            if (r > 200 && g > 150 && b < 100) return "ОРАНЖЕВЫХ";
+            if (r > 220 && g > 220 && b > 220) return "БЕЛЫХ";
+            return "ЦВЕТНЫХ";
+        }
+
         function playTick() {
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
@@ -208,33 +227,21 @@
             osc.stop(audioCtx.currentTime + 0.1);
         }
 
-        // МОЩНАЯ СИРЕНА
         function startLoudAlarm() {
             if (alarmOsc) return;
-
             alarmOsc = audioCtx.createOscillator();
             alarmGain = audioCtx.createGain();
-
-            alarmOsc.type = 'sawtooth'; // Резкий звук
+            alarmOsc.type = 'sawtooth';
             alarmOsc.frequency.setValueAtTime(400, audioCtx.currentTime);
-            
-            // Эффект "перелива" частоты (от 400 до 800 Гц)
-            alarmOsc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.5);
-            alarmOsc.frequency.setTargetAtTime(400, audioCtx.currentTime + 0.5, 0.5);
-            
-            // Цикличное изменение частоты
             const loopFreq = () => {
                 if(!alarmOsc) return;
                 alarmOsc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.5);
                 alarmOsc.frequency.exponentialRampToValueAtTime(400, audioCtx.currentTime + 1.0);
                 setTimeout(loopFreq, 1000);
             };
-
-            alarmGain.gain.setValueAtTime(0.3, audioCtx.currentTime); // Громкость
-
+            alarmGain.gain.setValueAtTime(0.3, audioCtx.currentTime);
             alarmOsc.connect(alarmGain);
             alarmGain.connect(audioCtx.destination);
-            
             alarmOsc.start();
             loopFreq();
         }
@@ -268,10 +275,16 @@
         function updateColors() {
             const ca = document.getElementById('pick-a').value;
             const cb = document.getElementById('pick-b').value;
+            
             document.documentElement.style.setProperty('--team-a-color', ca);
             document.documentElement.style.setProperty('--team-b-color', cb);
+            
             document.getElementById('half-a').style.backgroundColor = ca;
             document.getElementById('half-b').style.backgroundColor = cb;
+
+            // Обновляем текст заголовков
+            document.getElementById('label-a').innerText = `СТОРОНА «${getColorName(ca)}»`;
+            document.getElementById('label-b').innerText = `СТОРОНА «${getColorName(cb)}»`;
         }
 
         function adj(amt) {
@@ -299,10 +312,8 @@
             if (!running) return;
             if (audioCtx.state === 'suspended') audioCtx.resume();
             active = t;
-            
             document.getElementById('half-a').className = 'team-half' + (t === 1 ? ' active' : ' dimmed');
             document.getElementById('half-b').className = 'team-half' + (t === 2 ? ' active' : ' dimmed');
-            
             playTick();
         }
 
@@ -311,7 +322,6 @@
                 clearInterval(timerId);
                 running = false;
                 startLoudAlarm();
-                // Окно, которое остановит звук только при нажатии
                 setTimeout(() => {
                     if(confirm("РАУНД ЗАКОНЧЕН! Остановить сирену?")) {
                         stopLoudAlarm();
@@ -326,16 +336,6 @@
                 teamTimes[active]++;
                 document.getElementById(active === 1 ? 'timer-a' : 'timer-b').innerText = format(teamTimes[active]);
             }
-        }
-
-        // PWA Offline
-        if ('serviceWorker' in navigator) {
-            const swCode = `
-                self.addEventListener('install', e => e.waitUntil(caches.open('v1').then(c => c.add(location.href))));
-                self.addEventListener('fetch', e => e.respondWith(caches.match(e.request).then(r => r || fetch(e.request))));
-            `;
-            const blob = new Blob([swCode], {type: 'application/javascript'});
-            navigator.serviceWorker.register(URL.createObjectURL(blob));
         }
 
         updateColors();
